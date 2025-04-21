@@ -1,0 +1,21 @@
+Intentos fallidos de inicio de sesion
+grep "Failed password" access.log
+
+Todos los intentos de inicio de sesion de user1
+grep "user1" access.log
+
+Cuantas veces ha iniciado sesion user2
+grep "Accepted" access.log | grep "user2" | wc -l
+
+Todas las IPs
+grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort | uniq
+
+Todos los usuarios que han iniciado sesion
+grep "Accepted" access.log | awk '{print $9}' | sort | uniq
+
+CUantos inicios de sesion fallidos vienen de una IP especifica
+grep "Failed password" access.log | grep <IP> | wc -l
+grep "Failed password" access.log | grep "192.168.1.104" | wc -l
+
+
+

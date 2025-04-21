@@ -1,0 +1,21 @@
+# Host alias specification
+Host_Alias SERVIDORES = servidor1, servidor2, servidor3
+Host_Alias PERSONALES = pc1, pc2, pc3
+
+# User alias specification
+User_Alias USUARIOS = usuario1, usuario2, usuario3
+
+# Cmnd alias specification
+Cmd_Alias WATCHER = /bin/ls, /bin/cat
+Cmd_Alias EDITOR = /bin/nano, /bin/vi
+
+# User privilege specification
+root	ALL=(ALL:ALL) ALL
+
+usuario1 servidor1,servidor2 = (ALL) NOPASSWD: ALL
+usuario2 servidor3 = (ALL) WATCHER
+usuario3 servidor2,servidor3 = (usuario3) EDITOR
+
+# Allow members of group sudo to execute any command
+%sudo	ALL=(ALL:ALL) ALL
+%admins ALL = (ALL) ALL
