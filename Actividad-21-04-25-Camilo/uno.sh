@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Parte de las direcciones IPs
 archivo="hosts.csv"
 
