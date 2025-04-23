@@ -41,16 +41,11 @@ for host in "${hosts[@]}"; do
             echo "No se pudo conectar con $usuario@$host (error desconocido)"
         fi
     else
-        # Revisar si se pidio la contrasenia
-        if grep -q "password:" ssh_output.log; then
-            echo "Conexion fallida: SSH pidio contrasenia para $host"
-        else
-            echo "Conexion exitosa con $host"
-            echo "Usuarios conectados:"
-            grep -vE "^$" ssh_output.log | grep -v "up"
-            echo "Tiempo de actividad:"
-            grep "up" ssh_output.log
-        fi
+        echo "Conexion exitosa con $host"
+        echo "Usuarios conectados:"
+        grep -vE "^$" ssh_output.log | grep -v "up"
+        echo "Tiempo de actividad:"
+        grep "up" ssh_output.log
     fi
 
     echo "-------------------------------------"
