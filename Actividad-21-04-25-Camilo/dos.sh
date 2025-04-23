@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Guardar la salida en un archivo
+exec > >(tee -a informacion.txt) 2>&1
+
 archivo="revisar.csv"
 usuario="yankees"
 timeout=10
