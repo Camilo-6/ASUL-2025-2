@@ -26,18 +26,11 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 echo "Procesando archivo: $ARCHIVO_ENTRADA"
-contador_registros=0
-contador_creados=0
-contador_omitidos=0
-contador_errores=0
 
 tr '\r' '\n' < "$ARCHIVO_ENTRADA" | while IFS= read -r registro || [[ -n "$registro" ]]; do
   if [[ -z "$registro" ]]; then
     continue
   fi
-
-  ((contador_registros++))
-  echo "--- Registro $contador_registros ---"
 
   IFS="$SEPARADOR_COLUMNA" read -r -a campos <<< "$registro"
 
@@ -45,24 +38,20 @@ tr '\r' '\n' < "$ARCHIVO_ENTRADA" | while IFS= read -r registro || [[ -n "$regis
   clave_ssh="${campos[$INDICE_COL_CLAVE]}"
 
   if [[ -z "$nombre_usuario" ]]; then
-    echo "Advertencia: Omitiendo registro $contador_registros - Nombre de usuario en columna $((INDICE_COL_USUARIO + 1)) esta vacio."
-    ((contador_errores++))
+    echo "Advertencia: Omitiendo registro - Nombre de usuario en columna $((INDICE_COL_USUARIO + 1)) esta vacio."
     continue
   fi
   if ! [[ "$nombre_usuario" =~ ^[a-z_][a-z0-9_-]*[$]?$ ]]; then
-       echo "Advertencia: Omitiendo registro $contador_registros - Formato de nombre de usuario invalido: '$nombre_usuario'"
-       ((contador_errores++))
+       echo "Advertencia: Omitiendo registro - Formato de nombre de usuario invalido: '$nombre_usuario'"
        continue
   fi
 
   if [[ -z "$clave_ssh" ]]; then
-    echo "Advertencia: Omitiendo registro $contador_registros - Clave SSH en columna $((INDICE_COL_CLAVE + 1)) para usuario '$nombre_usuario' esta vacia."
-    ((contador_errores++))
+    echo "Advertencia: Omitiendo registro - Clave SSH en columna $((INDICE_COL_CLAVE + 1)) para usuario '$nombre_usuario' esta vacia."
     continue
   fi
   if ! [[ "$clave_ssh" =~ ^(ssh-(rsa|dss|ed25519)|ecdsa-sha2-nistp) ]]; then
-       echo "Advertencia: Omitiendo registro $contador_registros - Formato de clave SSH invalido para usuario '$nombre_usuario'."
-       ((contador_errores++))
+       echo "Advertencia: Omitiendo registro - Formato de clave SSH invalido para usuario '$nombre_usuario'."
        continue
   fi
 
@@ -71,17 +60,14 @@ tr '\r' '\n' < "$ARCHIVO_ENTRADA" | while IFS= read -r registro || [[ -n "$regis
 
   if id -u "$nombre_usuario" >/dev/null 2>&1; then
     echo "Info: Usuario '$nombre_usuario' ya existe. Omitiendo creacion."
-    ((contador_omitidos++))
   else
     echo "Creando usuario '$nombre_usuario'..."
     useradd -m -s /bin/bash "$nombre_usuario"
     if [[ $? -ne 0 ]]; then
       echo "Error: Fallo la creacion del usuario '$nombre_usuario'."
-      ((contador_errores++))
       continue
     else
        echo "Usuario '$nombre_usuario' creado exitosamente."
-       ((contador_creados++))
     fi
   fi
 
@@ -94,7 +80,6 @@ tr '\r' '\n' < "$ARCHIVO_ENTRADA" | while IFS= read -r registro || [[ -n "$regis
   mkdir -p "$directorio_ssh"
   if [[ $? -ne 0 ]]; then
     echo "Error: Fallo la creacion del directorio '$directorio_ssh'."
-    ((contador_errores++))
     continue
   fi
 
@@ -110,7 +95,6 @@ tr '\r' '\n' < "$ARCHIVO_ENTRADA" | while IFS= read -r registro || [[ -n "$regis
       echo "$clave_ssh" >> "$archivo_claves_autorizadas"
       if [[ $? -ne 0 ]]; then
         echo "Error: Fallo al anadir la clave a '$archivo_claves_autorizadas'."
-        ((contador_errores++))
         continue
       else
          echo "Clave anadida exitosamente a '$archivo_claves_autorizadas'."
@@ -127,13 +111,3 @@ tr '\r' '\n' < "$ARCHIVO_ENTRADA" | while IFS= read -r registro || [[ -n "$regis
   echo "Configuracion SSH completa para '$nombre_usuario'."
 
 done
-
-echo "========================================="
-echo "Procesamiento Completado."
-echo "Total de Registros Procesados: $contador_registros"
-echo "Usuarios Creados:              $contador_creados"
-echo "Usuarios Omitidos (Existen):   $contador_omitidos"
-echo "Errores/Advertencias:          $contador_errores"
-echo "========================================="
-
-exit 0
